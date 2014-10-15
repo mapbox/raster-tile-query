@@ -1,0 +1,9 @@
+.monitor
+files
+node_modules
+.DS_Store
+externals/*.cache
+settings.json
+settings.test.json
+puppet/manifests/.info.pp
+test/*/*.result.*
