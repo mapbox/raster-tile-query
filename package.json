@@ -1,0 +1,37 @@
+{
+  "name": "raster-tile-query",
+  "description": "Raster tile query module",
+  "version": "0.0.1",
+  "licenses": [
+    {
+      "type": "BSD"
+    }
+  ],
+  "keywords": [
+    "map",
+    "raster tiles"
+  ],
+  "url": "https://github.com/mapbox/raster-tile-query.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mapbox/raster-tile-query.git"
+  },
+  "author": {
+    "name": "Mapbox",
+    "url": "http://mapbox.com/",
+    "email": "info@mapbox.com"
+  },
+  "main": "./index",
+  "dependencies": {
+    "mapnik": "3.0.x",
+    "queue-async": "1.0.7",
+    "sphericalmercator": "~1.0.2"
+  },
+  "devDependencies": {
+    "mocha": "1.17.x",
+    "benchmark": "~1.0.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  }
+}
