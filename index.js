@@ -3,26 +3,42 @@ var sphericalmercator = require('sphericalmercator');
 var sm;
 var async = require('queue-async');
 
-
-function getPixels(imageBuffer, pixArr, zxy, tileSize, ids, callback) {
+function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
     var zoom = zxy.z;
     var tileX = zxy.x * tileSize;
     var tileY = zxy.y * tileSize;
     var image = mapnik.Image.fromBytesSync(imageBuffer);
     var output = [];
-    for (var i = 0; i < pixArr.length; i ++) {
-        var pCoords = sm.px(pixArr[i], zoom);
+
+    for (var i = 0; i < coords.length; i ++) {
+        var pCoords = sm.px(coords[i], zoom);
         var xy = getPixelXY(tileX, tileY, pCoords);
         var queryResult = {
             pixel: image.getPixel(xy.x, xy.y),
             latlng: {
-                lat: pixArr[i][0],
-                lng: pixArr[i][1]
+                lat: coords[i][0],
+                lng: coords[i][1]
             },
             id: ids[i]
         };
         output.push(queryResult);
 
+    }
+    return callback(null,output);
+}
+
+function emptyPixelResponse(coords, ids, callback) {
+    var output = [];
+    for (var i = 0; i < coords.length; i ++) {
+        var queryResult = {
+            pixel: null,
+            latlng: {
+                lat: coords[i][0],
+                lng: coords[i][1]
+            },
+            id: ids[i]
+        };
+        output.push(queryResult);
     }
     return callback(null,output);
 }
@@ -70,21 +86,29 @@ function buildQuery(points, zoom) {
 
 function loadTiles(queryPoints, maxZoom, minZoom, tileSize, loadFunction, callback) {
     if (!queryPoints[0].length) return callback(new Error('Invalid query points'));
+
     if (!sm) {
         sm = new sphericalmercator({
             size: tileSize
         });
     }
-
+    var nullcount = 0;
     function loadTileAsync(tileObj, loadFunction, callback) {
         loadFunction(tileObj.zxy, function(err, data) {
+            if (err && err.message === 'Tile does not exist') {
+                tileObj.data = '';
+                tileObj.empty = true;
+                nullcount++
+                if (nullcount === tileQuerier.length) return callback(new Error('No tiles have any data'));
+                return callback(null, tileObj);
+            }
             if (err) return callback(err);
             tileObj.data = data;
             return callback(null, tileObj);
         });
     }
 
-    var tileQuerier = buildQuery(queryPoints, maxZoom, 256);
+    var tileQuerier = buildQuery(queryPoints, maxZoom);
     var loadQueue = new async();
     for (var i = 0; i < tileQuerier.length; i++) {
         loadQueue.defer(loadTileAsync, tileQuerier[i], loadFunction);
@@ -106,7 +130,11 @@ function multiQuery(tileQuerier,imageSize,callback) {
     var queryQueue = new async();
 
     for (var i = 0; i<tileQuerier.length; i++) {
-        queryQueue.defer(getPixels, tileQuerier[i].data, tileQuerier[i].points, tileQuerier[i].zxy, imageSize, tileQuerier[i].pointIDs);
+        if (tileQuerier[i].empty) {
+            queryQueue.defer(emptyPixelResponse(tileQuerier[i].points,tileQuerier[i].pointIDs));
+        } else {
+            queryQueue.defer(getPixels, tileQuerier[i].data, tileQuerier[i].points, tileQuerier[i].zxy, imageSize, tileQuerier[i].pointIDs);
+        }
     }
 
     queryQueue.awaitAll(queriesDone);

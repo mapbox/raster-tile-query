@@ -6,7 +6,9 @@ var assert = require("assert");
 function readTile(tile,callback) {
     var tilepath = 'test/fixtures/' + tile.z + '/' + tile.x + '/' + tile.y + '.png';
     fs.readFile(tilepath, function(err,data) {
-        if (err) return callback(err)
+        if (err && err.code === 'ENOENT') return callback(new Error('Tile does not exist'));
+        if (err) return callback(err);
+
         return callback(null,data);
     });
 }
@@ -27,6 +29,24 @@ describe('Load correct tiles', function() {
             done();
         });
     });
+
+    it('should return empty string and empty: true if tile does not exist, but not fail if at least one tile has valid points', function(done) {
+        var points = [[30, -150],[39.24282321740235, -121.53676986694335]];
+        var validResp = '{"zxy":{"z":16,"x":5461,"y":27038},"points":[[-150,30]],"pointIDs":[0],"data":"","empty":true}';
+        rtq.loadTiles(points, 16, 17, 256, readTile, function(err,data) {
+            assert.equal(JSON.stringify(data[0]), validResp);
+            done();
+        });
+    });
+
+    it('should fail if tile does not exist, and no tile has valid data', function(done) {
+        var points = [[30, -150], [32, -151]];
+        var validErr = 'No tiles have any data';
+        rtq.loadTiles(points, 16, 17, 256, readTile, function(err,data) {
+            assert.equal(err.message, validErr);
+            done();
+        });
+    });
 });
 
 describe('Getting pixels', function() {
@@ -40,6 +60,23 @@ describe('Getting pixels', function() {
         assert.equal(JSON.stringify(pxy), validResp);
         done();
     });
+
+    it('should return the correct pixel value from a valid query', function(done) {
+        var zxy = {
+            z: 16,
+            x:10642,
+            y:24989
+        };
+        var pixels = [[-121.53676986694335, 39.24282321740235]];
+        var validResp = '[{"pixel":{"a":255,"b":108,"g":72,"r":117},"latlng":{"lat":-121.53676986694335,"lng":39.24282321740235},"id":0}]';
+        readTile(zxy, function(err, data) {
+            rtq.getPixels(data, pixels, zxy, 256, [0], function(err, results) {
+                assert.equal(JSON.stringify(results), validResp);
+                done();
+            });
+        })
+    });
+
 });
 
 describe('Return the correct results from a query', function() {
