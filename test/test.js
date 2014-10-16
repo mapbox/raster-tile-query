@@ -74,7 +74,23 @@ describe('Getting pixels', function() {
                 assert.equal(JSON.stringify(results), validResp);
                 done();
             });
-        })
+        });
+    });
+
+    it('should fail if the provided coordinates are not in the tile', function(done) {
+        var zxy = {
+            z: 16,
+            x:10642,
+            y:24989
+        };
+        var pixels = [[-120.5, 35.5]];
+        var validErr = 'Coordinates are not in tile';
+        readTile(zxy, function(err, data) {
+            rtq.getPixels(data, pixels, zxy, 256, [0], function(err, results) {
+                assert.equal(err.message, validErr);
+                done();
+            });
+        });
     });
 
 });
