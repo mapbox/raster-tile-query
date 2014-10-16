@@ -13,6 +13,7 @@ function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
     for (var i = 0; i < coords.length; i ++) {
         var pCoords = sm.px(coords[i], zoom);
         var xy = getPixelXY(tileX, tileY, pCoords);
+        if (xy.x >= tileSize || xy.y >= tileSize) return callback(new Error('Coordinates are not in tile'));
         var queryResult = {
             pixel: image.getPixel(xy.x, xy.y),
             latlng: {
@@ -98,9 +99,12 @@ function loadTiles(queryPoints, maxZoom, minZoom, tileSize, loadFunction, callba
             if (err && err.message === 'Tile does not exist') {
                 tileObj.data = '';
                 tileObj.empty = true;
-                nullcount++
-                if (nullcount === tileQuerier.length) return callback(new Error('No tiles have any data'));
-                return callback(null, tileObj);
+                nullcount++;
+                if (nullcount === tileQuerier.length) {
+                    return callback(new Error('No tiles have any data'));
+                } else {
+                    return callback(null, tileObj);
+                }
             }
             if (err) return callback(err);
             tileObj.data = data;
