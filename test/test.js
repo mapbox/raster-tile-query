@@ -30,11 +30,20 @@ describe('Load correct tiles', function() {
         });
     });
 
-    it('should return empty string if tile does not exist', function(done) {
-        var points = [[30, -150]];
-        var validResp = '[{"zxy":{"z":16,"x":5461,"y":27038},"points":[[-150,30]],"pointIDs":[0],"data":"","empty":true}]';
+    it('should return empty string and empty: true if tile does not exist, but not fail if at least one tile has valid points', function(done) {
+        var points = [[30, -150],[39.24282321740235, -121.53676986694335]];
+        var validResp = '{"zxy":{"z":16,"x":5461,"y":27038},"points":[[-150,30]],"pointIDs":[0],"data":"","empty":true}';
         rtq.loadTiles(points, 16, 17, 256, readTile, function(err,data) {
-            assert.equal(JSON.stringify(data), validResp);
+            assert.equal(JSON.stringify(data[0]), validResp);
+            done();
+        });
+    });
+
+    it('should fail if tile does not exist, and no tile has valid data', function(done) {
+        var points = [[30, -150], [32, -151]];
+        var validErr = 'No tiles have any data';
+        rtq.loadTiles(points, 16, 17, 256, readTile, function(err,data) {
+            assert.equal(err.message, validErr);
             done();
         });
     });
@@ -52,7 +61,7 @@ describe('Getting pixels', function() {
         done();
     });
 
-    it('should return the correct pixel value', function(done) {
+    it('should return the correct pixel value from a valid query', function(done) {
         var zxy = {
             z: 16,
             x:10642,
@@ -66,7 +75,8 @@ describe('Getting pixels', function() {
                 done();
             });
         })
-    })
+    });
+
 });
 
 describe('Return the correct results from a query', function() {

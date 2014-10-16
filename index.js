@@ -86,17 +86,20 @@ function buildQuery(points, zoom) {
 
 function loadTiles(queryPoints, maxZoom, minZoom, tileSize, loadFunction, callback) {
     if (!queryPoints[0].length) return callback(new Error('Invalid query points'));
+
     if (!sm) {
         sm = new sphericalmercator({
             size: tileSize
         });
     }
-
+    var nullcount = 0;
     function loadTileAsync(tileObj, loadFunction, callback) {
         loadFunction(tileObj.zxy, function(err, data) {
             if (err && err.message === 'Tile does not exist') {
                 tileObj.data = '';
                 tileObj.empty = true;
+                nullcount++
+                if (nullcount === tileQuerier.length) return callback(new Error('No tiles have any data'));
                 return callback(null, tileObj);
             }
             if (err) return callback(err);
@@ -131,7 +134,6 @@ function multiQuery(tileQuerier,imageSize,callback) {
             queryQueue.defer(emptyPixelResponse(tileQuerier[i].points,tileQuerier[i].pointIDs));
         } else {
             queryQueue.defer(getPixels, tileQuerier[i].data, tileQuerier[i].points, tileQuerier[i].zxy, imageSize, tileQuerier[i].pointIDs);
-
         }
     }
 
