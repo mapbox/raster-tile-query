@@ -85,7 +85,7 @@ function buildQuery(points, zoom) {
     return output;
 }
 
-function loadTiles(queryPoints, maxZoom, minZoom, tileSize, loadFunction, callback) {
+function loadTiles(queryPoints, maxZoom, minZoom, zoom, tileSize, loadFunction, callback) {
     if (!queryPoints[0].length) return callback(new Error('Invalid query points'));
 
     if (!sm) {
@@ -112,7 +112,7 @@ function loadTiles(queryPoints, maxZoom, minZoom, tileSize, loadFunction, callba
         });
     }
 
-    var tileQuerier = buildQuery(queryPoints, minZoom);
+    var tileQuerier = buildQuery(queryPoints, zoom);
     var loadQueue = new async();
     for (var i = 0; i < tileQuerier.length; i++) {
         loadQueue.defer(loadTileAsync, tileQuerier[i], loadFunction);
