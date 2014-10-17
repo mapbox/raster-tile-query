@@ -112,7 +112,7 @@ function loadTiles(queryPoints, maxZoom, minZoom, tileSize, loadFunction, callba
         });
     }
 
-    var tileQuerier = buildQuery(queryPoints, maxZoom);
+    var tileQuerier = buildQuery(queryPoints, minZoom);
     var loadQueue = new async();
     for (var i = 0; i < tileQuerier.length; i++) {
         loadQueue.defer(loadTileAsync, tileQuerier[i], loadFunction);
