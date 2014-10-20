@@ -4,7 +4,6 @@ var sm;
 var async = require('queue-async');
 
 function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
-    var zoom = zxy.z;
 
     var image = mapnik.Image.fromBytesSync(imageBuffer);
     var iWidth = image.width();
@@ -21,7 +20,7 @@ function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
     var output = [];
 
     for (var i = 0; i < coords.length; i ++) {
-        var pCoords = sm.px(coords[i], zoom);
+        var pCoords = sm.px(coords[i], zxy.z);
         var xy = getPixelXY(tileX, tileY, pCoords);
         if (xy.x >= tileSize || xy.y >= tileSize) return callback(new Error('Coordinates are not in tile'));
         var queryResult = {
