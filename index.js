@@ -5,9 +5,19 @@ var async = require('queue-async');
 
 function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
     var zoom = zxy.z;
+
+    var image = mapnik.Image.fromBytesSync(imageBuffer);
+    var iWidth = image.width();
+    var iHeight = image.height();
+
+    if (iWidth !== iHeight) {
+        return callback(new Error('Invalid tile at ' + zxy.z + '/'+ zxy.x + '/'+ zxy.y));
+    } else if (iWidth !== tileSize) {
+        return callback(new Error('Tilesize ' + tileSize + ' does not match image dimensions ' + iWidth + 'x' + iHeight));
+    }
+
     var tileX = zxy.x * tileSize;
     var tileY = zxy.y * tileSize;
-    var image = mapnik.Image.fromBytesSync(imageBuffer);
     var output = [];
 
     for (var i = 0; i < coords.length; i ++) {
@@ -93,6 +103,7 @@ function loadTiles(queryPoints, maxZoom, minZoom, zoom, tileSize, loadFunction, 
             size: tileSize
         });
     }
+
     var nullcount = 0;
     function loadTileAsync(tileObj, loadFunction, callback) {
         loadFunction(tileObj.zxy, function(err, data) {
