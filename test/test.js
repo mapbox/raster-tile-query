@@ -39,7 +39,7 @@ describe('Load correct tiles', function() {
         });
     });
 
-    it('should fail if tile does not exist, and no tile has valid data', function(done) {
+    it('should error if tile does not exist, and no tile has valid data', function(done) {
         var points = [[30, -150], [32, -151]];
         var validErr = 'No tiles have any data';
         rtq.loadTiles(points, 16, 17, 16, 256, readTile, function(err,data) {
@@ -47,6 +47,39 @@ describe('Load correct tiles', function() {
             done();
         });
     });
+
+    it('should return an error if tile is not square', function(done) {
+        var points = [[0,0]];
+        var zxy = {
+            z: 0,
+            x: 0,
+            y: 0
+        };
+        var validErr = 'Invalid tile at 0/0/0';
+        readTile(zxy, function(err, data) {
+            rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
+                assert.equal(err.message, validErr);
+                done();
+            });
+        });
+    });
+
+    it('should return an error if loaded tile size does not match image size', function(done) {
+        var zxy = {
+            z: 16,
+            x:10642,
+            y:24989
+        };
+        var points = [[-121.53676986694335, 39.24282321740235]];
+        var validErr = 'Tilesize 512 does not match image dimensions 256x256';
+        readTile(zxy, function(err, data) {
+            rtq.getPixels(data, points, zxy, 512, [0], function(err, results) {
+                assert.equal(err.message, validErr);
+                done();
+            });
+        });
+    });
+
 });
 
 describe('Getting pixels', function() {
@@ -67,10 +100,10 @@ describe('Getting pixels', function() {
             x:10642,
             y:24989
         };
-        var pixels = [[-121.53676986694335, 39.24282321740235]];
+        var points = [[-121.53676986694335, 39.24282321740235]];
         var validResp = '[{"pixel":{"a":255,"b":108,"g":72,"r":117},"latlng":{"lat":-121.53676986694335,"lng":39.24282321740235},"id":0}]';
         readTile(zxy, function(err, data) {
-            rtq.getPixels(data, pixels, zxy, 256, [0], function(err, results) {
+            rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
                 assert.equal(JSON.stringify(results), validResp);
                 done();
             });

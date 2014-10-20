@@ -5,9 +5,19 @@ var async = require('queue-async');
 
 function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
     var zoom = zxy.z;
+
+    var image = mapnik.Image.fromBytesSync(imageBuffer);
+    var iWidth = image.width();
+    var iHeight = image.height();
+
+    if (iWidth !== iHeight) {
+        return callback(new Error('Invalid tile at ' + zxy.z + '/'+ zxy.x + '/'+ zxy.y));
+    } else if (iWidth !== tileSize) {
+        return callback(new Error('Tilesize ' + tileSize + ' does not match image dimensions ' + iWidth + 'x' + iHeight));
+    }
+
     var tileX = zxy.x * tileSize;
     var tileY = zxy.y * tileSize;
-    var image = mapnik.Image.fromBytesSync(imageBuffer);
     var output = [];
 
     for (var i = 0; i < coords.length; i ++) {
@@ -84,48 +94,6 @@ function buildQuery(points, zoom) {
     }
     return output;
 }
-// function zoomQueryFinder(tileArr, zoom, minZoom, maxZoom, tileSize) {
-//     var hypFactor = 1.41421356237;
-//     var optimalDensity = tileSize * hypFactor;
-//     var maxPointDensity = 0;
-//     for (var i = 0; i < tileArr.length; i ++) {
-//         if (tileArr.points.length > maxPointDensity) {
-//             maxPointDensity = tileArr.points.length;
-//         }
-//     }
-//     var reduction = 
-// }
-
-// var QueryBuilder = function() {};
-
-// QueryBuilder.prototype = {
-//     tileReduce: function(points, minZoom, threshold) {
-//         if (this.tiles.length > threshold) {
-//              this.zoom -= 1;
-//              if (this.zoom >= minZoom) {
-//                 this.tiles = buildQuery(points, this.zoom);
-//                 try {
-//                     this.tileReduce(points, minZoom, threshold);
-//                 } catch(e) {
-//                     return e; 
-//                 }
-//              } else {
-//                 return this.tiles;
-//              }
-//         } else {
-//             return this.tiles;
-//         }
-//     },
-//     reduce: function(tiles, points, currentZoom, minZoom, threshold) {
-//         this.tiles = tiles;
-//         this.zoom = currentZoom;
-//         this.tileReduce(points, minZoom, threshold);
-//         return this.tiles;
-//     },
-//     tiles: {},
-//     zoom: {}
-// };
-
 
 function loadTiles(queryPoints, maxZoom, minZoom, zoom, tileSize, loadFunction, callback) {
     if (!queryPoints[0].length) return callback(new Error('Invalid query points'));
@@ -135,7 +103,7 @@ function loadTiles(queryPoints, maxZoom, minZoom, zoom, tileSize, loadFunction, 
             size: tileSize
         });
     }
-    console.log(zoom);
+
     var nullcount = 0;
     function loadTileAsync(tileObj, loadFunction, callback) {
         loadFunction(tileObj.zxy, function(err, data) {
