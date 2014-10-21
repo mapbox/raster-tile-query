@@ -26,8 +26,8 @@ function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
         var queryResult = {
             pixel: image.getPixel(xy.x, xy.y),
             latlng: {
-                lat: coords[i][0],
-                lng: coords[i][1]
+                lat: coords[i][1],
+                lng: coords[i][0]
             },
             id: ids[i]
         };
@@ -43,8 +43,8 @@ function emptyPixelResponse(coords, ids, callback) {
         var queryResult = {
             pixel: null,
             latlng: {
-                lat: coords[i][0],
-                lng: coords[i][1]
+                lat: coords[i][1],
+                lng: coords[i][0]
             },
             id: ids[i]
         };
