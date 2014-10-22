@@ -26,8 +26,8 @@ function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
         var queryResult = {
             pixel: image.getPixel(xy.x, xy.y),
             latlng: {
-                lat: coords[i][0],
-                lng: coords[i][1]
+                lat: coords[i][1],
+                lng: coords[i][0]
             },
             id: ids[i]
         };
@@ -43,8 +43,8 @@ function emptyPixelResponse(coords, ids, callback) {
         var queryResult = {
             pixel: null,
             latlng: {
-                lat: coords[i][0],
-                lng: coords[i][1]
+                lat: coords[i][1],
+                lng: coords[i][0]
             },
             id: ids[i]
         };
@@ -145,7 +145,7 @@ function multiQuery(tileQuerier,imageSize,callback) {
 
     for (var i = 0; i<tileQuerier.length; i++) {
         if (tileQuerier[i].empty) {
-            queryQueue.defer(emptyPixelResponse(tileQuerier[i].points,tileQuerier[i].pointIDs));
+            queryQueue.defer(emptyPixelResponse, tileQuerier[i].points,tileQuerier[i].pointIDs);
         } else {
             queryQueue.defer(getPixels, tileQuerier[i].data, tileQuerier[i].points, tileQuerier[i].zxy, imageSize, tileQuerier[i].pointIDs);
         }
@@ -159,5 +159,6 @@ module.exports = {
     buildQuery: buildQuery,
     loadTiles: loadTiles,
     multiQuery: multiQuery,
-    getPixelXY: getPixelXY
+    getPixelXY: getPixelXY,
+    emptyPixelResponse: emptyPixelResponse
 };
