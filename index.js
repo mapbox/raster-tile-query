@@ -145,7 +145,7 @@ function multiQuery(tileQuerier,imageSize,callback) {
 
     for (var i = 0; i<tileQuerier.length; i++) {
         if (tileQuerier[i].empty) {
-            queryQueue.defer(emptyPixelResponse(tileQuerier[i].points,tileQuerier[i].pointIDs));
+            queryQueue.defer(emptyPixelResponse, tileQuerier[i].points,tileQuerier[i].pointIDs);
         } else {
             queryQueue.defer(getPixels, tileQuerier[i].data, tileQuerier[i].points, tileQuerier[i].zxy, imageSize, tileQuerier[i].pointIDs);
         }
@@ -159,5 +159,6 @@ module.exports = {
     buildQuery: buildQuery,
     loadTiles: loadTiles,
     multiQuery: multiQuery,
-    getPixelXY: getPixelXY
+    getPixelXY: getPixelXY,
+    emptyPixelResponse: emptyPixelResponse
 };
