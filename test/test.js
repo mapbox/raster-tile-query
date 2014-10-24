@@ -180,6 +180,23 @@ describe('Return the correct results from a query', function() {
         });
     });
 
+    it('should work for multiple tile queries and select the correct zoom', function(done) {
+        var validResp = '[{"pixel":{"a":255,"b":103,"g":65,"r":137},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0},{"pixel":{"a":255,"b":111,"g":73,"r":150},"latlng":{"lat":39.241626684998266,"lng":-121.53685569763182},"id":1},{"pixel":{"a":255,"b":117,"g":70,"r":164},"latlng":{"lat":39.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"a":255,"b":112,"g":67,"r":154},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"a":255,"b":112,"g":73,"r":147},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"a":255,"b":102,"g":63,"r":137},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"a":255,"b":114,"g":78,"r":138},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"a":255,"b":118,"g":72,"r":155},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"a":255,"b":106,"g":60,"r":141},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":{"a":255,"b":107,"g":66,"r":143},"latlng":{"lat":39.23484594918998,"lng":-121.53762817382814},"id":9},{"pixel":{"a":255,"b":121,"g":95,"r":148},"latlng":{"lat":39.23398,"lng":-121.53637},"id":10}]';
+        var options = {
+            maxZoom: 17,
+            minZoom: 9,
+            tileSize: 256
+        }
+        rtq.loadTiles(testPoints.points, options, readTile, function(err,data) {
+            if (err) throw err;
+            rtq.multiQuery(data,256,function(err,query) {
+                assert.equal(JSON.stringify(query),validResp);
+                done();
+            });
+        });
+    });
+
+
     it('should work for single-point queries', function(done) {
         var point = [[39.24282321740235,-121.53676986694335]];
         var validResp = '[{"pixel":{"a":255,"b":108,"g":72,"r":117},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0}]';
@@ -225,7 +242,7 @@ describe('Utility functions should work as intended', function() {
         }
         var queryLength = 100;
         var tileSize = 256;
-        var expectedZoom = 13;
+        var expectedZoom = 14;
         var estimatedZoom = rtq.estimatePixelSnap(extent, smExtent, queryLength, tileSize);
         assert.equal(expectedZoom, estimatedZoom);
         done();
@@ -235,7 +252,7 @@ describe('Utility functions should work as intended', function() {
         var maxZoom = 17;
         var minZoom = 10;
         var tileSize = 256;
-        var expectedZoom = 10;
+        var expectedZoom = 11;
         var estimatedZoom = rtq.estimateZoom(testPoints.points, minZoom, maxZoom, tileSize);
         assert.equal(expectedZoom, estimatedZoom);
         done();

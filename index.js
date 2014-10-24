@@ -116,10 +116,10 @@ function estimatePixelSnap(extent, smExtent, queryLength, tileSize) {
     smExtent.yRange = smExtent.upperRight[1] - smExtent.lowerLeft[1];
     var pRatio;
     if (smExtent.xRange > smExtent.yRange) {
-        pRatio = ((extent[3] - extent[1]) / Math.ceil((smExtent.xRange / (smExtent.xRange + smExtent.yRange)) * queryLength) * tileSize);
+        pRatio = ((extent[3] - extent[1]) / Math.ceil((smExtent.xRange / (smExtent.xRange + smExtent.yRange)) * queryLength * 2) * tileSize);
         return Math.ceil((Math.log(1 / (extent[3] - extent[1])) + Math.log(360)) / Math.log(2));
     } else {
-        pRatio = ((extent[2] - extent[0]) / Math.ceil((smExtent.yRange / (smExtent.xRange + smExtent.yRange)) * queryLength) * tileSize);
+        pRatio = ((extent[2] - extent[0]) / Math.ceil((smExtent.yRange / (smExtent.xRange + smExtent.yRange)) * queryLength * 2) * tileSize);
         return Math.ceil((Math.log(1 / (pRatio)) + Math.log(170.10225756)) / Math.log(2));
     }
 }
