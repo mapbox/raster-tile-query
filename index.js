@@ -94,8 +94,71 @@ function buildQuery(points, zoom) {
     return output;
 }
 
-function loadTiles(queryPoints, maxZoom, minZoom, zoom, tileSize, loadFunction, callback) {
+function getExtent(points) {
+    var bounds = [points[0][0], points[0][1], points[0][0],points[0][1]];
+    return points.reduce(function(a, b) {
+        if (bounds[0] > b[0]) {
+            bounds[0] = b[0];
+        } else if (bounds[2] < b[0]){
+            bounds[2] = b[0];
+        }
+        if (bounds[1] > b[1]) {
+            bounds[1] = b[1];
+        } else if (bounds[3] < b[1]) {
+            bounds[3] = b[1];
+        }
+        return bounds;
+    });
+}
+
+function estimatePixelSnap(extent, smExtent, queryLength, tileSize) {
+    smExtent.xRange = smExtent.upperRight[0] - smExtent.lowerLeft[0];
+    smExtent.yRange = smExtent.upperRight[1] - smExtent.lowerLeft[1];
+    var pRatio;
+    if (smExtent.xRange > smExtent.yRange) {
+        pRatio = ((extent[3] - extent[1]) / Math.ceil((smExtent.xRange / (smExtent.xRange + smExtent.yRange)) * queryLength) * tileSize);
+        return Math.ceil((Math.log(1 / (extent[3] - extent[1])) + Math.log(360)) / Math.log(2));
+    } else {
+        pRatio = ((extent[2] - extent[0]) / Math.ceil((smExtent.yRange / (smExtent.xRange + smExtent.yRange)) * queryLength) * tileSize);
+        return Math.ceil((Math.log(1 / (pRatio)) + Math.log(170.10225756)) / Math.log(2));
+    }
+}
+
+function estimateZoom(queryPoints, minZoom, maxZoom, tileSize) {
+    if (queryPoints.length === 1) {
+        return maxZoom;
+    } else {
+        if (!sm) {
+            sm = new sphericalmercator({
+                size: tileSize
+            });
+        }
+        var extent = getExtent(queryPoints);
+        var smExtent = {
+            lowerLeft: sm.forward([extent[1], extent[0]]),
+            upperRight: sm.forward([extent[3], extent[2]])
+        };
+        var estZ = estimatePixelSnap(extent, smExtent, queryPoints.length, tileSize);
+
+        if (estZ > maxZoom) {
+            estZ = maxZoom;
+        } else if (estZ < minZoom) {
+            estZ = minZoom;
+        }
+        return estZ;
+    }
+}
+
+function loadTiles(queryPoints, options, loadFunction, callback) {
     if (!queryPoints[0].length) return callback(new Error('Invalid query points'));
+
+    if (options.maxZoom === undefined) return callback(new Error('Max zoom must be specified'));
+
+    if (options.minZoom === undefined) return callback(new Error('Min zoom must be specified'));
+
+    var minZoom = options.minZoom;
+    var maxZoom = options.maxZoom;
+    var tileSize = options.tileSize || 256;
 
     if (!sm) {
         sm = new sphericalmercator({
@@ -103,7 +166,10 @@ function loadTiles(queryPoints, maxZoom, minZoom, zoom, tileSize, loadFunction, 
         });
     }
 
+    var zoom = options.zoom !== undefined ? options.zoom : estimateZoom(queryPoints, minZoom, maxZoom, tileSize);
+
     var nullcount = 0;
+
     function loadTileAsync(tileObj, loadFunction, callback) {
         loadFunction(tileObj.zxy, function(err, data) {
             if (err && err.message === 'Tile does not exist') {
@@ -160,5 +226,7 @@ module.exports = {
     loadTiles: loadTiles,
     multiQuery: multiQuery,
     getPixelXY: getPixelXY,
-    emptyPixelResponse: emptyPixelResponse
+    emptyPixelResponse: emptyPixelResponse,
+    estimateZoom: estimateZoom,
+    estimatePixelSnap: estimatePixelSnap
 };
