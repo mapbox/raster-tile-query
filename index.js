@@ -24,7 +24,7 @@ function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
         var xy = getPixelXY(tileX, tileY, pCoords);
         if (xy.x >= tileSize || xy.y >= tileSize) return callback(new Error('Coordinates are not in tile'));
         var queryResult = {
-            pixel: image.getPixel(xy.x, xy.y),
+            pixel: image.getPixel(xy.x, xy.y, {get_color:true}),
             latlng: {
                 lat: coords[i][1],
                 lng: coords[i][0]
