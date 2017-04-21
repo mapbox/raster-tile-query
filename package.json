@@ -1,5 +1,5 @@
 {
-  "name": "raster-tile-query",
+  "name": "@mapbox/raster-tile-query",
   "description": "Raster tile query module",
   "version": "0.2.0",
   "licenses": [
