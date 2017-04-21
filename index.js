@@ -14,6 +14,7 @@ var async = require('queue-async');
  * @param {Function} callback - `function(err, results)`
  *
  * @example
+ * var rtq = require('@mapbox/raster-tile-query');
  * var fs = require('fs');
  * var img = fs.readFileSync('./path/to/tile.png');
  * var zxy = {
@@ -22,26 +23,24 @@ var async = require('queue-async');
  *    y:24989
  * };
  * var points = [[-121, 39]];
- * readTile(zxy, function(err, data) {
- *   rtq.getPixels(img, points, zxy, 256, [0], function(err, results) {
- *     console.log(results);
- *     // [
- *     //   {
- *     //     "pixel": {
- *     //       "premultiplied": false,
- *     //       "a":255,
- *     //       "b":108,
- *     //       "g":72,
- *     //       "r":117
- *     //     },
- *     //     "latlng": {
- *     //       "lat":39,
- *     //       "lng":-121
- *     //     },
- *     //     "id":0
- *     //   }
- *     // ]
- *  });
+ * rtq.getPixels(img, points, zxy, 256, [0], function(err, results) {
+ *   console.log(results);
+ *   // [
+ *   //   {
+ *   //     "pixel": {
+ *   //       "premultiplied": false,
+ *   //       "a":255,
+ *   //       "b":108,
+ *   //       "g":72,
+ *   //       "r":117
+ *   //     },
+ *   //     "latlng": {
+ *   //       "lat":39,
+ *   //       "lng":-121
+ *   //     },
+ *   //     "id":0
+ *   //   }
+ *   // ]
  * });
  */
 function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
@@ -102,6 +101,9 @@ function sortBy(sortField) {
     };
 }
 
+/**
+ *
+ */
 function getPixelXY(tileX, tileY, pixel) {
     return {
         x: pixel[0] - tileX,
