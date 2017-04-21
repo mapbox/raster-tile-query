@@ -3,6 +3,47 @@ var sphericalmercator = require('sphericalmercator');
 var sm;
 var async = require('queue-async');
 
+/**
+ * Get the pixel value information for a given array of lat/long coordinate pairs
+ *
+ * @param {Buffer} imageBuffer
+ * @param {Array} coords - array of x/y point arrays
+ * @param {Object} zxy - zxy object in the form of `{z: z, x: x, y: y}`
+ * @param {number} tileSize - pixel size of the tile (all tiles are perfect squares)
+ * @param {Array} ids - array of ids to represent the response for each coordinate in `coords`
+ * @param {Function} callback - `function(err, results)`
+ *
+ * @example
+ * var fs = require('fs');
+ * var img = fs.readFileSync('./path/to/tile.png');
+ * var zxy = {
+ *    z: 16,
+ *    x:10642,
+ *    y:24989
+ * };
+ * var points = [[-121, 39]];
+ * readTile(zxy, function(err, data) {
+ *   rtq.getPixels(img, points, zxy, 256, [0], function(err, results) {
+ *     console.log(results);
+ *     // [
+ *     //   {
+ *     //     "pixel": {
+ *     //       "premultiplied": false,
+ *     //       "a":255,
+ *     //       "b":108,
+ *     //       "g":72,
+ *     //       "r":117
+ *     //     },
+ *     //     "latlng": {
+ *     //       "lat":39,
+ *     //       "lng":-121
+ *     //     },
+ *     //     "id":0
+ *     //   }
+ *     // ]
+ *  });
+ * });
+ */
 function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
 
     var image = mapnik.Image.fromBytesSync(imageBuffer);
