@@ -2,4 +2,64 @@
 raster-tile-query
 =================
 
-raster-tile-query allows you to query raster tiles and return pixel values at specific lng, lats
+:warning: **This project is a proof of concept and not intended for production use.** :warning:
+
+If you are looking to just get pixel values from an image, we recommend using [Node Mapnik](http://mapnik.org/documentation/node-mapnik/) directly instead of this library. This is explained below.
+
+In order to query raster tiles are particular longitudes and latitudes, you'll need to know the X, Y, an Z values of your image tile to be able to interpolate which relative pixel to get information from. This is generally found in the request URL of your tile like this tile URL below with values Z: `3`, X: `2`, Y: `3`:
+
+```
+https://api.mapbox.com/v4/mapbox.streets/3/2/3.png?access_token={token}
+https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token={token}
+```
+
+The following main steps are taken to get relative pixel values:
+
+* convert your lng/lat coordinates into pixel coordinates for your individual image.
+* Determine the pixel location of your image with x,y,z and image pixel size.
+* then subtract the two steps above to get relative pixel location for your image. If your latitude and longitude do not line up with the image, they will either be negative in number, or greater than the image size in pixels.
+* Use an image reading library such as Mapnik or get-pixel to retrieve pixel data
+
+Here is an example script using Mapnik
+
+```JavaScript
+var fs = require('fs');
+var mapnik = require('mapnik');
+var SM = require('@mapbox/sphericalmercator');
+var sm = new SM();
+
+/**
+ * Get the pixel values of an image from a longitude and latitude when proviiding the
+ * image's zxy information.
+ *
+ * @param {Object} options
+ * @param {Buffer} buffer - the buffer of the image to get pixel information from
+ * @param {Number} imageSize - the size in pixels of the image. It must be square. Typical values are 256 or 512
+ * @param {Number} lng - the longitude value
+ * @param {Number} lat - the latitude value
+ * @param {Number} x - the tile `x` coordinate
+ * @param {Number} y - the tile `y` coordinate
+ * @param {Number} z - the zoom level of the tile
+ * @returns {Object} pixel information from a particular point on the image
+ */
+function getPixel(options) {
+  // get tile x and y pixel locations
+  var tileX = options.x * options.imageSize;
+  var tileY = options.y * options.imageSize;
+
+  // get pixel coordinates of the lat/lng values at specific zoom
+  var pixelCoords = sm.px([options.lng, options.lat], options.z);
+
+  // get relative pixel coordinates to the tile
+  var x = pixelCoords[0] - tileX;
+  var y = pixelCoords[1] - tileY;
+
+  // generate new mapnik image object from the buffer
+  var img = new mapnik.Image.fromBytesSync(options.buffer);
+
+  // get pixel values at relative x/y positions for this image
+  var values = img.getPixel(x, y, { get_color: true });
+
+  return values;
+}
+```
