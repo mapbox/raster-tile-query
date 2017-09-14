@@ -4,9 +4,9 @@ raster-tile-query
 
 :warning: **This project is a proof of concept and not intended for production use.** :warning:
 
-If you are looking to just get pixel values from an image, we recommend using [Node Mapnik](http://mapnik.org/documentation/node-mapnik/) directly instead of this library. This is explained below.
+If you are looking to just get pixel values from an image, we recommend using [Node Mapnik](http://mapnik.org/documentation/node-mapnik/) and [sphericalmercator](https://github.com/mapbox/sphericalmercator) directly instead of this library. This is explained below.
 
-In order to query raster tiles are particular longitudes and latitudes, you'll need to know the X, Y, an Z values of your image tile to be able to interpolate which relative pixel to get information from. This is generally found in the request URL of your tile like this tile URL below with values Z: `3`, X: `2`, Y: `3`:
+To query raster tiles at particular longitudes and latitudes, you'll need to know the X, Y, Z, and pixel size of your image tile to be able to interpolate which relative pixel to get information from. XYZ info is generally found in the request URL of your tile like this:
 
 ```
 https://api.mapbox.com/v4/mapbox.streets/3/2/3.png?access_token={token}
@@ -18,9 +18,9 @@ The following main steps are taken to get relative pixel values:
 * convert your lng/lat coordinates into pixel coordinates for your individual image.
 * Determine the pixel location of your image with x,y,z and image pixel size.
 * then subtract the two steps above to get relative pixel location for your image. If your latitude and longitude do not line up with the image, they will either be negative in number, or greater than the image size in pixels.
-* Use an image reading library such as Mapnik or get-pixel to retrieve pixel data
+* Use an image reading library such as Node Mapnik or [get-pixels](https://www.npmjs.com/package/get-pixels) to retrieve pixel data
 
-Here is an example script using Mapnik
+Here is an example script using Node Mapnik
 
 ```JavaScript
 var fs = require('fs');
