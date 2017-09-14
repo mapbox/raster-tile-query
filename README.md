@@ -34,12 +34,12 @@ var sm = new SM();
  *
  * @param {Object} options
  * @param {Buffer} buffer - the buffer of the image to get pixel information from
- * @param {Number} imageSize - the size in pixels of the image. It must be square. Typical values are 256 or 512
- * @param {Number} lng - the longitude value
- * @param {Number} lat - the latitude value
- * @param {Number} x - the tile `x` coordinate
- * @param {Number} y - the tile `y` coordinate
- * @param {Number} z - the zoom level of the tile
+ * @param {Number} options.imageSize - the size in pixels of the image. It must be square. Typical values are 256 or 512
+ * @param {Number} options.lng - the longitude value
+ * @param {Number} options.lat - the latitude value
+ * @param {Number} options.x - the tile `x` coordinate
+ * @param {Number} options.y - the tile `y` coordinate
+ * @param {Number} options.z - the zoom level of the tile
  * @returns {Object} pixel information from a particular point on the image
  */
 function getPixel(options) {
