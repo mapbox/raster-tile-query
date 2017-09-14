@@ -33,7 +33,7 @@ var sm = new SM();
  * image's zxy information.
  *
  * @param {Object} options
- * @param {Buffer} buffer - the buffer of the image to get pixel information from
+ * @param {Buffer} options.buffer - the buffer of the image to get pixel information from
  * @param {Number} options.imageSize - the size in pixels of the image. It must be square. Typical values are 256 or 512
  * @param {Number} options.lng - the longitude value
  * @param {Number} options.lat - the latitude value
