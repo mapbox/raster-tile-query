@@ -6,11 +6,11 @@ raster-tile-query
 
 If you are looking to just get pixel values from an image, we recommend using [Node Mapnik](http://mapnik.org/documentation/node-mapnik/) and [sphericalmercator](https://github.com/mapbox/sphericalmercator) directly instead of this library. This is explained below.
 
-To query raster tiles at particular longitudes and latitudes, you'll need to know the X, Y, Z, and pixel size of your image tile to be able to interpolate which relative pixel to get information from. XYZ info is generally found in the request URL of your tile like this:
+To query raster tiles, such as [Mapbox Terrain RGB tiles](https://blog.mapbox.com/global-elevation-data-6689f1d0ba65), at particular longitudes and latitudes, you'll need to know the X, Y, Z, and pixel size of your image tile to be able to interpolate which relative pixel to get information from. XYZ info is generally found in the request URL of your tile like this:
 
 ```
-https://api.mapbox.com/v4/mapbox.streets/3/2/3.png?access_token={token}
-https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token={token}
+https://api.mapbox.com/v4/mapbox.terrain-rgb/3/2/3.pngraw?access_token={your-api-token}
+https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token={your-api-token}
 ```
 
 The following main steps are taken to get relative pixel values:
