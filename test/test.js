@@ -76,7 +76,7 @@ describe('Load correct tiles', function() {
         var validErr = 'Invalid tile at 0/0/0';
         readTile(zxy, function(err, data) {
             rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
-                assert.equal(err.message, validErr);
+                assert.equal(results[0].error.message, validErr);
                 done();
             });
         });
@@ -92,7 +92,7 @@ describe('Load correct tiles', function() {
         var validErr = 'Tilesize 512 does not match image dimensions 256x256';
         readTile(zxy, function(err, data) {
             rtq.getPixels(data, points, zxy, 512, [0], function(err, results) {
-                assert.equal(err.message, validErr);
+                assert.equal(results[0].error.message, validErr);
                 done();
             });
         });
@@ -154,7 +154,7 @@ describe('Getting pixels', function() {
         var validErr = 'Coordinates are not in tile';
         readTile(zxy, function(err, data) {
             rtq.getPixels(data, pixels, zxy, 256, [0], function(err, results) {
-                assert.equal(err.message, validErr);
+                assert.equal(results[0].error.message, validErr);
                 done();
             });
         });
