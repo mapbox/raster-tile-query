@@ -87,8 +87,8 @@ function sortBy(sortField) {
 
 function getPixelXY(tileX, tileY, pixel) {
     return {
-        x: pixel[0] - tileX,
-        y: pixel[1] - tileY
+        x: pixel[0] - tileX - 1,
+        y: pixel[1] - tileY - 1
     };
 }
 
