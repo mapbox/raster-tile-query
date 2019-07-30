@@ -3,7 +3,7 @@ var fs = require('fs');
 var testPoints = require('./fixtures/test-coords');
 var assert = require("assert");
 
-function readTile(tile,callback) {
+function readTile(tile, options, callback) {
     var tilepath = 'test/fixtures/' + tile.z + '/' + tile.x + '/' + tile.y + '.png';
     fs.readFile(tilepath, function(err,data) {
         if (err && err.code === 'ENOENT') return callback(new Error('Tile does not exist'));
@@ -74,9 +74,9 @@ describe('Load correct tiles', function() {
             y: 0
         };
         var validErr = 'Invalid tile at 0/0/0';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
-                assert.equal(err.message, validErr);
+                assert.equal(results[0].error.message, validErr);
                 done();
             });
         });
@@ -90,9 +90,9 @@ describe('Load correct tiles', function() {
         };
         var points = [[-121.53676986694335, 39.24282321740235]];
         var validErr = 'Tilesize 512 does not match image dimensions 256x256';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, points, zxy, 512, [0], function(err, results) {
-                assert.equal(err.message, validErr);
+                assert.equal(results[0].error.message, validErr);
                 done();
             });
         });
@@ -106,7 +106,7 @@ describe('Getting pixels', function() {
         var tileY = 24989;
         var tileSize = 256;
         var absXY = [2724584, 6397316];
-        var validResp = '{"x":232,"y":132}';
+        var validResp = '{"x":231,"y":131}';
         var pxy = rtq.getPixelXY(tileX * tileSize, tileY * tileSize, absXY);
         assert.equal(JSON.stringify(pxy), validResp);
         done();
@@ -119,8 +119,8 @@ describe('Getting pixels', function() {
             y:24989
         };
         var points = [[-121.53676986694335, 39.24282321740235]];
-        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":108,"g":72,"r":117},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0}]';
-        readTile(zxy, function(err, data) {
+        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":110,"g":71,"r":118},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0}]';
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
                 assert.equal(JSON.stringify(results), validResp);
                 done();
@@ -136,7 +136,7 @@ describe('Getting pixels', function() {
         };
         var points = [[-127.53676986694335, 32.24282321740235]];
         var validResp = '[{"pixel":null,"latlng":{"lat":32.24282321740235,"lng":-127.53676986694335},"id":0}]';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.emptyPixelResponse(points, [0], function(err, results) {
                 assert.equal(JSON.stringify(results), validResp);
                 done();
@@ -151,10 +151,10 @@ describe('Getting pixels', function() {
             y:24989
         };
         var pixels = [[-120.5, 35.5]];
-        var validErr = 'Coordinates are not in tile';
-        readTile(zxy, function(err, data) {
+        var validErr = 'Coordinates are not in tile, condition met x=48548 >= 256 || y=219700 >= 256';
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, pixels, zxy, 256, [0], function(err, results) {
-                assert.equal(err.message, validErr);
+                assert.equal(results[0].error.message, validErr);
                 done();
             });
         });
@@ -164,7 +164,7 @@ describe('Getting pixels', function() {
 
 describe('Return the correct results from a query', function() {
     it('should work for multiple tile queries', function(done) {
-        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":108,"g":72,"r":117},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0},{"pixel":{"premultiplied":false,"a":255,"b":116,"g":65,"r":162},"latlng":{"lat":39.241626684998266,"lng":-121.53685569763182},"id":1},{"pixel":{"premultiplied":false,"a":255,"b":119,"g":69,"r":170},"latlng":{"lat":39.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"premultiplied":false,"a":255,"b":118,"g":66,"r":171},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":72,"r":145},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"premultiplied":false,"a":255,"b":98,"g":67,"r":104},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"premultiplied":false,"a":255,"b":107,"g":66,"r":133},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":72,"r":152},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"premultiplied":false,"a":255,"b":101,"g":58,"r":125},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":{"premultiplied":false,"a":255,"b":107,"g":59,"r":161},"latlng":{"lat":39.23484594918998,"lng":-121.53762817382814},"id":9},{"pixel":{"premultiplied":false,"a":255,"b":108,"g":64,"r":163},"latlng":{"lat":39.23398,"lng":-121.53637},"id":10}]';
+        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":110,"g":71,"r":118},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0},{"pixel":{"premultiplied":false,"a":255,"b":119,"g":65,"r":178},"latlng":{"lat":39.241626684998266,"lng":-121.53685569763182},"id":1},{"pixel":{"premultiplied":false,"a":255,"b":120,"g":68,"r":172},"latlng":{"lat":39.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"premultiplied":false,"a":255,"b":118,"g":71,"r":164},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":71,"r":147},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"premultiplied":false,"a":255,"b":100,"g":65,"r":115},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"premultiplied":false,"a":255,"b":105,"g":65,"r":127},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":69,"r":159},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"premultiplied":false,"a":255,"b":105,"g":59,"r":141},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":{"premultiplied":false,"a":255,"b":103,"g":59,"r":144},"latlng":{"lat":39.23484594918998,"lng":-121.53762817382814},"id":9},{"pixel":{"premultiplied":false,"a":255,"b":108,"g":66,"r":159},"latlng":{"lat":39.23398,"lng":-121.53637},"id":10}]';
         var options = {
             maxZoom: 17,
             minZoom: 15,
@@ -181,7 +181,7 @@ describe('Return the correct results from a query', function() {
     });
 
     it('should work for multiple tile queries and select the correct zoom', function(done) {
-        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":103,"g":65,"r":137},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0},{"pixel":{"premultiplied":false,"a":255,"b":111,"g":73,"r":150},"latlng":{"lat":39.241626684998266,"lng":-121.53685569763182},"id":1},{"pixel":{"premultiplied":false,"a":255,"b":117,"g":70,"r":164},"latlng":{"lat":39.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"premultiplied":false,"a":255,"b":112,"g":67,"r":154},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"premultiplied":false,"a":255,"b":112,"g":73,"r":147},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"premultiplied":false,"a":255,"b":102,"g":63,"r":137},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"premultiplied":false,"a":255,"b":114,"g":78,"r":138},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"premultiplied":false,"a":255,"b":118,"g":72,"r":155},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"premultiplied":false,"a":255,"b":106,"g":60,"r":141},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":{"premultiplied":false,"a":255,"b":107,"g":66,"r":143},"latlng":{"lat":39.23484594918998,"lng":-121.53762817382814},"id":9},{"pixel":{"premultiplied":false,"a":255,"b":121,"g":95,"r":148},"latlng":{"lat":39.23398,"lng":-121.53637},"id":10}]';
+        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":102,"g":68,"r":138},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0},{"pixel":{"premultiplied":false,"a":255,"b":102,"g":68,"r":135},"latlng":{"lat":39.241626684998266,"lng":-121.53685569763182},"id":1},{"pixel":{"premultiplied":false,"a":255,"b":110,"g":70,"r":146},"latlng":{"lat":39.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":76,"r":158},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"premultiplied":false,"a":255,"b":109,"g":65,"r":152},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"premultiplied":false,"a":255,"b":104,"g":62,"r":147},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"premultiplied":false,"a":255,"b":104,"g":66,"r":129},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"premultiplied":false,"a":255,"b":122,"g":85,"r":149},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"premultiplied":false,"a":255,"b":118,"g":72,"r":155},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":{"premultiplied":false,"a":255,"b":122,"g":84,"r":145},"latlng":{"lat":39.23484594918998,"lng":-121.53762817382814},"id":9},{"pixel":{"premultiplied":false,"a":255,"b":113,"g":82,"r":144},"latlng":{"lat":39.23398,"lng":-121.53637},"id":10}]';
         var options = {
             maxZoom: 17,
             minZoom: 9,
@@ -199,7 +199,7 @@ describe('Return the correct results from a query', function() {
 
     it('should work for single-point queries', function(done) {
         var point = [[39.24282321740235,-121.53676986694335]];
-        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":108,"g":72,"r":117},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0}]';
+        var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":110,"g":71,"r":118},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0}]';
         var options = {
             maxZoom: 17,
             minZoom: 15,
@@ -216,7 +216,7 @@ describe('Return the correct results from a query', function() {
     });
 
     it('should return null for points in a non-existent tile, but not fail if at least one tile has valid points', function(done) {
-        var validResp = '[{"pixel":null,"latlng":{"lat":33.24282321740235,"lng":-120.53676986694335},"id":0},{"pixel":null,"latlng":{"lat":33.241626684998266,"lng":-120.53685569763182},"id":1},{"pixel":null,"latlng":{"lat":33.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"premultiplied":false,"a":255,"b":118,"g":66,"r":171},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":72,"r":145},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"premultiplied":false,"a":255,"b":98,"g":67,"r":104},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"premultiplied":false,"a":255,"b":107,"g":66,"r":133},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":72,"r":152},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"premultiplied":false,"a":255,"b":101,"g":58,"r":125},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":null,"latlng":{"lat":40.23484594918998,"lng":-111.53762817382814},"id":9},{"pixel":null,"latlng":{"lat":40.23398,"lng":-111.53637},"id":10}]';
+        var validResp = '[{"pixel":null,"latlng":{"lat":33.24282321740235,"lng":-120.53676986694335},"id":0},{"pixel":null,"latlng":{"lat":33.241626684998266,"lng":-120.53685569763182},"id":1},{"pixel":null,"latlng":{"lat":33.241626684998266,"lng":-121.53565406799318},"id":2},{"pixel":{"premultiplied":false,"a":255,"b":118,"g":71,"r":164},"latlng":{"lat":39.24056308350469,"lng":-121.53642654418945},"id":3},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":71,"r":147},"latlng":{"lat":39.239499465884755,"lng":-121.53582572937012},"id":4},{"pixel":{"premultiplied":false,"a":255,"b":100,"g":65,"r":115},"latlng":{"lat":39.23873498075964,"lng":-121.53672695159912},"id":5},{"pixel":{"premultiplied":false,"a":255,"b":105,"g":65,"r":127},"latlng":{"lat":39.23743866085578,"lng":-121.53651237487793},"id":6},{"pixel":{"premultiplied":false,"a":255,"b":115,"g":69,"r":159},"latlng":{"lat":39.236707392907185,"lng":-121.53779983520508},"id":7},{"pixel":{"premultiplied":false,"a":255,"b":105,"g":59,"r":141},"latlng":{"lat":39.23584315732298,"lng":-121.53668403625488},"id":8},{"pixel":null,"latlng":{"lat":40.23484594918998,"lng":-111.53762817382814},"id":9},{"pixel":null,"latlng":{"lat":40.23398,"lng":-111.53637},"id":10}]';
         var options = {
             maxZoom: 16,
             minZoom: 15,
