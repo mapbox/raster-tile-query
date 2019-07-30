@@ -195,7 +195,7 @@ function loadTiles(queryPoints, options, loadFunction, callback) {
     var nullcount = 0;
 
     function loadTileAsync(tileObj, loadFunction, callback) {
-        loadFunction(tileObj.zxy, function(err, data) {
+        loadFunction(tileObj.zxy, options, function(err, data) {
             if (err && err.message === 'Tile does not exist') {
                 tileObj.data = '';
                 tileObj.empty = true;

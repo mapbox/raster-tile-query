@@ -3,7 +3,7 @@ var fs = require('fs');
 var testPoints = require('./fixtures/test-coords');
 var assert = require("assert");
 
-function readTile(tile,callback) {
+function readTile(tile, options, callback) {
     var tilepath = 'test/fixtures/' + tile.z + '/' + tile.x + '/' + tile.y + '.png';
     fs.readFile(tilepath, function(err,data) {
         if (err && err.code === 'ENOENT') return callback(new Error('Tile does not exist'));
@@ -74,7 +74,7 @@ describe('Load correct tiles', function() {
             y: 0
         };
         var validErr = 'Invalid tile at 0/0/0';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
                 assert.equal(results[0].error.message, validErr);
                 done();
@@ -90,7 +90,7 @@ describe('Load correct tiles', function() {
         };
         var points = [[-121.53676986694335, 39.24282321740235]];
         var validErr = 'Tilesize 512 does not match image dimensions 256x256';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, points, zxy, 512, [0], function(err, results) {
                 assert.equal(results[0].error.message, validErr);
                 done();
@@ -120,7 +120,7 @@ describe('Getting pixels', function() {
         };
         var points = [[-121.53676986694335, 39.24282321740235]];
         var validResp = '[{"pixel":{"premultiplied":false,"a":255,"b":110,"g":71,"r":118},"latlng":{"lat":39.24282321740235,"lng":-121.53676986694335},"id":0}]';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, points, zxy, 256, [0], function(err, results) {
                 assert.equal(JSON.stringify(results), validResp);
                 done();
@@ -136,7 +136,7 @@ describe('Getting pixels', function() {
         };
         var points = [[-127.53676986694335, 32.24282321740235]];
         var validResp = '[{"pixel":null,"latlng":{"lat":32.24282321740235,"lng":-127.53676986694335},"id":0}]';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.emptyPixelResponse(points, [0], function(err, results) {
                 assert.equal(JSON.stringify(results), validResp);
                 done();
@@ -152,7 +152,7 @@ describe('Getting pixels', function() {
         };
         var pixels = [[-120.5, 35.5]];
         var validErr = 'Coordinates are not in tile, condition met x=48548 >= 256 || y=219700 >= 256';
-        readTile(zxy, function(err, data) {
+        readTile(zxy, {}, function(err, data) {
             rtq.getPixels(data, pixels, zxy, 256, [0], function(err, results) {
                 assert.equal(results[0].error.message, validErr);
                 done();
