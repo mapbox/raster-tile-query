@@ -23,14 +23,14 @@
   },
   "main": "./index",
   "dependencies": {
-    "mapnik": "~4.2.0",
-    "node-fetch": "^2.5.0",
+    "mapnik": "~4.5.0",
+    "node-fetch": "^2.6.1",
     "queue-async": "1.0.7",
     "sphericalmercator": "~1.0.2"
   },
   "devDependencies": {
     "benchmark": "~1.0.0",
-    "mocha": "^6.1.4"
+    "mocha": "^6.2.3"
   },
   "scripts": {
     "test": "mocha"
