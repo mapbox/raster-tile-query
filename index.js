@@ -8,29 +8,53 @@ function getPixels(imageBuffer, coords, zxy, tileSize, ids, callback) {
     var image = mapnik.Image.fromBytesSync(imageBuffer);
     var iWidth = image.width();
     var iHeight = image.height();
+    var error = null;
 
     if (iWidth !== iHeight) {
-        return callback(new Error('Invalid tile at ' + zxy.z + '/'+ zxy.x + '/'+ zxy.y));
+        error = new Error('Invalid tile at ' + zxy.z + '/'+ zxy.x + '/'+ zxy.y);
     } else if (iWidth !== tileSize) {
-        return callback(new Error('Tilesize ' + tileSize + ' does not match image dimensions ' + iWidth + 'x' + iHeight));
+        error = new Error('Tilesize ' + tileSize + ' does not match image dimensions ' + iWidth + 'x' + iHeight);
     }
+
+    var output = [];
+    if(error) {
+        coords.forEach((coord, i) => {
+            output.push({
+                pixel: null,
+                latlng: {
+                    lat: coord[i][1],
+                    lng: coord[i][0]
+                },
+                id: i,
+                error: error
+            })
+        })
+        return callback(null,output)
+    }
+
 
     var tileX = zxy.x * tileSize;
     var tileY = zxy.y * tileSize;
-    var output = [];
 
     for (var i = 0; i < coords.length; i ++) {
         var pCoords = sm.px(coords[i], zxy.z);
         var xy = getPixelXY(tileX, tileY, pCoords);
-        if (xy.x >= tileSize || xy.y >= tileSize) return callback(new Error('Coordinates are not in tile'));
+        var pixel, error = null
+        if (xy.x >= tileSize || xy.y >= tileSize)
+            error = new Error(`Coordinates are not in tile, condition met x=${xy.x} >= ${tileSize} || y=${xy.y} >= ${tileSize}`);
+        else
+            pixel = image.getPixel(xy.x, xy.y, {get_color:true});
+
         var queryResult = {
-            pixel: image.getPixel(xy.x, xy.y, {get_color:true}),
+            pixel: pixel,
             latlng: {
                 lat: coords[i][1],
                 lng: coords[i][0]
             },
             id: ids[i]
         };
+        if(error) queryResult.error = error
+
         output.push(queryResult);
 
     }
@@ -63,8 +87,8 @@ function sortBy(sortField) {
 
 function getPixelXY(tileX, tileY, pixel) {
     return {
-        x: pixel[0] - tileX,
-        y: pixel[1] - tileY
+        x: pixel[0] - tileX - 1,
+        y: pixel[1] - tileY - 1
     };
 }
 
@@ -171,7 +195,7 @@ function loadTiles(queryPoints, options, loadFunction, callback) {
     var nullcount = 0;
 
     function loadTileAsync(tileObj, loadFunction, callback) {
-        loadFunction(tileObj.zxy, function(err, data) {
+        loadFunction(tileObj.zxy, options, function(err, data) {
             if (err && err.message === 'Tile does not exist') {
                 tileObj.data = '';
                 tileObj.empty = true;

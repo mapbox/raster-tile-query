@@ -1,7 +1,7 @@
 {
-  "name": "@mapbox/raster-tile-query",
+  "name": "@tirn-technology/raster-tile-query",
   "description": "Raster tile query module",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "licenses": [
     {
       "type": "BSD"
@@ -23,13 +23,14 @@
   },
   "main": "./index",
   "dependencies": {
-    "mapnik": "~3.7.0",
+    "mapnik": "^4.5.9",
+    "node-fetch": "^2.6.1",
     "queue-async": "1.0.7",
     "sphericalmercator": "~1.0.2"
   },
   "devDependencies": {
-    "mocha": "1.17.x",
-    "benchmark": "~1.0.0"
+    "benchmark": "~1.0.0",
+    "mocha": "^6.2.3"
   },
   "scripts": {
     "test": "mocha"
