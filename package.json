@@ -1,5 +1,5 @@
 {
-  "name": "@mapbox/raster-tile-query",
+  "name": "@tirn-technology/raster-tile-query",
   "description": "Raster tile query module",
   "version": "1.1.0",
   "licenses": [
@@ -23,7 +23,7 @@
   },
   "main": "./index",
   "dependencies": {
-    "mapnik": "~4.5.0",
+    "mapnik": "^4.5.9",
     "node-fetch": "^2.6.1",
     "queue-async": "1.0.7",
     "sphericalmercator": "~1.0.2"
